@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <property name="LOGS_PATH" value="./logs" />
+    
+    <!-- Appender para console com formato colorido -->
+    <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>
+                %cyan(%d{ISO8601}) %highlight(%-5level) [%blue(%t)] %yellow(%C{1}): %msg%n%throwable
+            </pattern>
+        </encoder>
+    </appender>
+
+    <!-- Appender para logs de auditoria em JSON -->
+    <appender name="AuditJson" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOGS_PATH}/audit.json</file>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <includeMdcKeyName>userId</includeMdcKeyName>
+            <includeMdcKeyName>action</includeMdcKeyName>
+            <includeMdcKeyName>resourceType</includeMdcKeyName>
+            <includeMdcKeyName>resourceId</includeMdcKeyName>
+            <includeMdcKeyName>status</includeMdcKeyName>
+            <includeMdcKeyName>ipAddress</includeMdcKeyName>
+            <includeMdcKeyName>userAgent</includeMdcKeyName>
+            <includeMdcKeyName>duration</includeMdcKeyName>
+            <includeMdcKeyName>errorDetails</includeMdcKeyName>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOGS_PATH}/audit-%d{yyyy-MM-dd}.json</fileNamePattern>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>3GB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    <!-- Appender para logs de sistema -->
+    <appender name="SystemFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOGS_PATH}/system.log</file>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%d{ISO8601} %-5level [%thread] %logger{36} - %msg%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOGS_PATH}/system-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>3GB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    <!-- Appender para logs de erro -->
+    <appender name="ErrorFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOGS_PATH}/error.log</file>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%d{ISO8601} %-5level [%thread] %logger{36} - %msg%n%exception{full}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOGS_PATH}/error-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>2GB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    <!-- Logger específico para auditoria -->
+    <logger name="br.com.corretor.service.AuditService" level="INFO" additivity="false">
+        <appender-ref ref="AuditJson" />
+        <appender-ref ref="Console" />
+    </logger>
+
+    <!-- Logger para pacote de banco -->
+    <logger name="br.com.corretor.service.banco" level="DEBUG" additivity="false">
+        <appender-ref ref="SystemFile" />
+        <appender-ref ref="ErrorFile" />
+        <appender-ref ref="Console" />
+    </logger>
+
+    <!-- Logger para pacote de conciliação -->
+    <logger name="br.com.corretor.service.conciliacao" level="DEBUG" additivity="false">
+        <appender-ref ref="SystemFile" />
+        <appender-ref ref="ErrorFile" />
+        <appender-ref ref="Console" />
+    </logger>
+
+    <!-- Root logger -->
+    <root level="INFO">
+        <appender-ref ref="SystemFile" />
+        <appender-ref ref="ErrorFile" />
+        <appender-ref ref="Console" />
+    </root>
+
+</configuration>

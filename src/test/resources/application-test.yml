@@ -1,0 +1,9 @@
+    org.springframework.data.r2dbc: DEBUG
+    org.springframework.transaction: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.test: DEBUG
+    br.com.corretor: DEBUG
+    io.r2dbc.h2: DEBUG
+
+debug: true
